@@ -1,0 +1,11 @@
+{
+    "name": "g000m/visual-regression",
+    "type": "wordpress-plugin",
+    "authors": [
+        {
+            "name": "Gabe Herbert",
+            "email": "gh@gabeherbert.com"
+        }
+    ],
+    "require": {}
+}
