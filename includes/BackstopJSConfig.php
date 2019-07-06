@@ -1,6 +1,6 @@
 <?php
 
-require __DIR__.'/../vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 use Alc\SitemapCrawler;
 
@@ -11,92 +11,93 @@ use Alc\SitemapCrawler;
  * It parses sitemap.xml by given URL, and generates config file for BackstopJS
  * by given attributes.
  */
+class BackstopJSConfig {
+	private $siteMapXMLURL = '';
+	private $defaultScenario = null;
+	private $configOutput = null;
 
-class BackstopJSConfig{
-  private $siteMapXMLURL = '';
-  private $defaultScenario = NULL;
-  private $configOutput = NULL;
+	private $viewports = array();
+	private $scenarios = array();
+	private $paths = array();
+	private $engine = '';
+	private $report = array();
+	private $debug = false;
+	private $port = 0;
 
-  private $viewports = array();
-  private $scenarios = array();
-  private $paths = array();
-  private $engine = '';
-  private $report = array();
-  private $debug = FALSE;
-  private $port = 0;
+	private $defaultConfigPath = 'defaultConfig.json';
 
-  private $defaultConfigPath = 'defaultConfig.json';
+	private $destDir = WP_CONTENT_DIR . '/uploads/backstopConfig.json';
 
-  private $destDir = WP_CONTENT_DIR . '/uploads/backstopConfig.json';
+	/**
+	 * BackstopJSConfig constructor.
+	 *
+	 * @param $siteMapXMLURL
+	 *   URL of sitemap.xml
+	 */
+	public function __construct( $siteMapXMLURL ) {
+		// Set sitemap.xml URL.
+		$this->siteMapXMLURL = $siteMapXMLURL;
 
-  /**
-   * BackstopJSConfig constructor.
-   * @param $siteMapXMLURL
-   *   URL of sitemap.xml
-   */
-  public function __construct($siteMapXMLURL) {
-    // Set sitemap.xml URL.
-    $this->siteMapXMLURL = $siteMapXMLURL;
+		// Load default config presets.
+		$defaultConfig = $this->loadDefaultConfig();
 
-    // Load default config presets.
-    $defaultConfig = $this->loadDefaultConfig();
+		// Load viewports from config template.
+		if ( ! empty( $defaultConfig['viewports'] ) && is_array( $defaultConfig['viewports'] ) ) {
+			foreach ( $defaultConfig['viewports'] as $viewport ) {
+				$this->viewports[] = (object) $viewport;
+			}
+		}
 
-    // Load viewports from config template.
-    if (!empty($defaultConfig['viewports']) && is_array($defaultConfig['viewports'])) {
-      foreach ($defaultConfig['viewports'] as $viewport) {
-        $this->viewports[] = (object) $viewport;
-      }
-    }
+		// Load default scenario from config template. That will be used for
+		// generating scenarios from sitemap.xml.
+		if ( ! empty( $defaultConfig['defaultScenario'] ) ) {
+			$this->defaultScenario = (object) $defaultConfig['defaultScenario'];
+		}
 
-    // Load default scenario from config template. That will be used for
-    // generating scenarios from sitemap.xml.
-    if (!empty($defaultConfig['defaultScenario'])) {
-      $this->defaultScenario = (object) $defaultConfig['defaultScenario'];
-    }
+		// Load paths from config template.
+		if ( ! empty( $defaultConfig['paths'] ) && is_array( $defaultConfig['paths'] ) ) {
+			foreach ( $defaultConfig['paths'] as $path ) {
+				$this->paths[] = $path;
+			}
+		}
 
-    // Load paths from config template.
-    if (!empty($defaultConfig['paths']) && is_array($defaultConfig['paths'])) {
-      foreach ($defaultConfig['paths'] as $path) {
-        $this->paths[] = $path;
-      }
-    }
+		// Load engine from config template.
+		if ( ! empty( $defaultConfig['engine'] ) ) {
+			$this->engine = $defaultConfig['engine'];
+		}
 
-    // Load engine from config template.
-    if (!empty($defaultConfig['engine'])) {
-      $this->engine = $defaultConfig['engine'];
-    }
+		// Load report from config template.
+		if ( ! empty( $defaultConfig['report'] ) && is_array( $defaultConfig['report'] ) ) {
+			foreach ( $defaultConfig['report'] as $report ) {
+				$this->report[] = $report;
+			}
+		}
 
-    // Load report from config template.
-    if (!empty($defaultConfig['report']) && is_array($defaultConfig['report'])) {
-      foreach ($defaultConfig['report'] as $report) {
-        $this->report[] = $report;
-      }
-    }
+		// Load debug from config template.
+		if ( ! empty( $defaultConfig['debug'] ) ) {
+			$this->debug = $defaultConfig['debug'];
+		}
 
-    // Load debug from config template.
-    if (!empty($defaultConfig['debug'])) {
-      $this->debug = $defaultConfig['debug'];
-    }
+		// Load port from config template.
+		if ( ! empty( $defaultConfig['port'] ) ) {
+			$this->port = $defaultConfig['port'];
+		}
+	}
 
-    // Load port from config template.
-    if (!empty($defaultConfig['port'])) {
-      $this->port = $defaultConfig['port'];
-    }
-  }
+	/**
+	 * Load default config template.
+	 * @return mixed
+	 */
+	private function loadDefaultConfig() {
+		$string = file_get_contents( plugin_dir_path( __FILE__ ) . '/' . $this->defaultConfigPath );
 
-  /**
-   * Load default config template.
-   * @return mixed
-   */
-  private function loadDefaultConfig() {
-    $string = file_get_contents( plugin_dir_path(__FILE__) . '/' . $this->defaultConfigPath);
-    return json_decode($string, TRUE);
-  }
+		return json_decode( $string, true );
+	}
 
 
-  /**
-   * Load scenarios from sitemap.xml.
-   */
+	/**
+	 * Load scenarios from sitemap.xml.
+	 */
 	private function loadScenarios() {
 		$crawler = new SitemapCrawler();
 
@@ -129,108 +130,109 @@ class BackstopJSConfig{
 		}
 	}
 
-  /**
-   * Generate JSON config file based on loaded input.
-   * @param string $destPath
-   */
-  public function generateConfig($destPath = '') {
-    if (empty($destPath)) {
-      $destPath = $this->destDir;
-    }
+	/**
+	 * Generate JSON config file based on loaded input.
+	 *
+	 * @param string $destPath
+	 */
+	public function generateConfig( $destPath = '' ) {
+		if ( empty( $destPath ) ) {
+			$destPath = $this->destDir;
+		}
 
-    $this->loadScenarios();
+		$this->loadScenarios();
 
-    $configOutput = new stdClass();
-    $configOutput->viewports = $this->viewports;
-    $configOutput->scenarios = $this->scenarios;
-    $configOutput->paths = $this->paths;
-    $configOutput->engine = $this->engine;
-    $configOutput->report = $this->report;
-    $configOutput->debug = $this->debug;
+		$configOutput            = new stdClass();
+		$configOutput->viewports = $this->viewports;
+		$configOutput->scenarios = $this->scenarios;
+		$configOutput->paths     = $this->paths;
+		$configOutput->engine    = $this->engine;
+		$configOutput->report    = $this->report;
+		$configOutput->debug     = $this->debug;
 
-    $this->configOutput = $configOutput;
+		$this->configOutput = $configOutput;
 
-    // @TODO add some error handling
-    $fp = fopen($destPath, 'w');
-    fwrite($fp, json_encode($configOutput, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
-    fclose($fp);
-  }
+		// @TODO add some error handling
+		$fp = fopen( $destPath, 'w' );
+		fwrite( $fp, json_encode( $configOutput, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) );
+		fclose( $fp );
+	}
 
-  /**
-   * Getter for default scenario.
-   * @return null|object
-   */
-  public function getDefaultScenario() {
-    $scenario = new stdClass();
-    $vars = get_object_vars($this->defaultScenario);
-    foreach ($vars as $name => $value) {
-      $scenario->$name = $value;
-    }
+	/**
+	 * Getter for default scenario.
+	 * @return null|object
+	 */
+	public function getDefaultScenario() {
+		$scenario = new stdClass();
+		$vars     = get_object_vars( $this->defaultScenario );
+		foreach ( $vars as $name => $value ) {
+			$scenario->$name = $value;
+		}
 
-    return $scenario;
-  }
+		return $scenario;
+	}
 
 	/**
 	 * return config object
 	 * @return object
 	 */
-  public function getConfig() {
-  	return $this->configOutput;
-  }
+	public function getConfig() {
+		return $this->configOutput;
+	}
 
-  /**
-   * @param string $siteMapXMLURL
-   */
-  public function setSiteMapXMLURL($siteMapXMLURL) {
-    $this->siteMapXMLURL = $siteMapXMLURL;
-  }
+	/**
+	 * @param string $siteMapXMLURL
+	 */
+	public function setSiteMapXMLURL( $siteMapXMLURL ) {
+		$this->siteMapXMLURL = $siteMapXMLURL;
+	}
 
-  /**
-   * @param array $viewports
-   */
-  public function setViewports($viewports) {
-    $this->viewports = $viewports;
-  }
+	/**
+	 * @param array $viewports
+	 */
+	public function setViewports( $viewports ) {
+		$this->viewports = $viewports;
+	}
 
-  /**
-   * @param array $scenarios
-   */
-  public function setScenarios($scenarios) {
-    $this->scenarios = $scenarios;
-  }
+	/**
+	 * @param array $scenarios
+	 */
+	public function setScenarios( $scenarios ) {
+		$this->scenarios = $scenarios;
+	}
 
-  /**
-   * @param array $paths
-   */
-  public function setPaths($paths) {
-    $this->paths = $paths;
-  }
+	/**
+	 * @param array $paths
+	 */
+	public function setPaths( $paths ) {
+		$this->paths = $paths;
+	}
 
-  /**
-   * @param string $engine
-   */
-  public function setEngine($engine) {
-    $this->engine = $engine;
-  }
+	/**
+	 * @param string $engine
+	 */
+	public function setEngine( $engine ) {
+		$this->engine = $engine;
+	}
 
-  /**
-   * @param array $report
-   */
-  public function setReport($report) {
-    $this->report = $report;
-  }
+	/**
+	 * @param array $report
+	 */
+	public function setReport( $report ) {
+		$this->report = $report;
+	}
 
-  /**
-   * @param boolean $debug
-   */
-  public function setDebug($debug) {
-    $this->debug = $debug;
-  }
+	/**
+	 * @param boolean $debug
+	 */
+	public function setDebug( $debug ) {
+		$this->debug = $debug;
+	}
 
-  /**
-   * @param int $port
-   */
-  public function setPort($port) {
-    $this->port = $port;
-  }
+	/**
+	 * @param int $port
+	 */
+	public function setPort( $port ) {
+		$this->port = $port;
+	}
 }
