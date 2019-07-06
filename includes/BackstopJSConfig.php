@@ -15,6 +15,7 @@ use Alc\SitemapCrawler;
 class BackstopJSConfig{
   private $siteMapXMLURL = '';
   private $defaultScenario = NULL;
+  private $configOutput = NULL;
 
   private $viewports = array();
   private $scenarios = array();
@@ -147,6 +148,9 @@ class BackstopJSConfig{
     $configOutput->report = $this->report;
     $configOutput->debug = $this->debug;
 
+    $this->configOutput = $configOutput;
+
+    // @TODO add some error handling
     $fp = fopen($destPath, 'w');
     fwrite($fp, json_encode($configOutput, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
     fclose($fp);
@@ -164,6 +168,14 @@ class BackstopJSConfig{
     }
 
     return $scenario;
+  }
+
+	/**
+	 * return config object
+	 * @return object
+	 */
+  public function getConfig() {
+  	return $this->configOutput;
   }
 
   /**

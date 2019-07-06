@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7df63e64b5e4a7b50ed61339734adc10",
+    "content-hash": "664e019bcaaf00e98b8072c8e19379ca",
     "packages": [
         {
             "name": "alc/curl",
@@ -145,35 +145,6 @@
                 "crawler"
             ],
             "time": "2016-12-07T14:54:41+00:00"
-        },
-        {
-            "name": "g000m/backstopjsconfig",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/g000m/BackstopJSConfig.git",
-                "reference": "a3c6a686175d3def1b939a977bc214c0f09befe1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/g000m/BackstopJSConfig/zipball/a3c6a686175d3def1b939a977bc214c0f09befe1",
-                "reference": "a3c6a686175d3def1b939a977bc214c0f09befe1",
-                "shasum": ""
-            },
-            "require": {
-                "alc/sitemap-crawler": "^1.0"
-            },
-            "type": "library",
-            "authors": [
-                {
-                    "name": "Gabe Herbert",
-                    "email": "gh@gabeherbert.com"
-                }
-            ],
-            "support": {
-                "source": "https://github.com/g000m/BackstopJSConfig/tree/master"
-            },
-            "time": "2019-06-28T23:46:08+00:00"
         },
         {
             "name": "neitanod/forceutf8",

@@ -127,11 +127,18 @@ class Visual_Regression_Admin {
 	 * @since 1.0.0
 	 */
 	public function display_plugin_setup_page() {
-		echo "w00t";
 
 		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
 
 		$config = new BackstopJSConfig(get_site_url() . '/sitemap.xml');
 		$config->generateConfig();
+
+		$generatedConfig = $config->getConfig();
+
+		echo "Testing URLs:\n";
+
+		foreach ($generatedConfig->scenarios as $scenario) {
+			echo "<div>$scenario->url</div>";
+		}
 	}
 }
