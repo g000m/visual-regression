@@ -6,14 +6,5 @@
             "name": "Gabe Herbert",
             "email": "gh@gabeherbert.com"
         }
-    ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/g000m/backstopjsconfig"
-        }
-    ],
-    "require": {
-        "g000m/backstopjsconfig": "v1.0.0"
-    }
+    ]
 }
