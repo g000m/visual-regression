@@ -6,5 +6,8 @@
             "name": "Gabe Herbert",
             "email": "gh@gabeherbert.com"
         }
-    ]
+    ],
+    "require": {
+        "alc/sitemap-crawler": "^1.0"
+    }
 }
