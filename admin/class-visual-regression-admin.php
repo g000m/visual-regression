@@ -27,7 +27,7 @@ class Visual_Regression_Admin {
 	 *
 	 * @since    1.0.0
 	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
+	 * @var      string $plugin_name The ID of this plugin.
 	 */
 	private $plugin_name;
 
@@ -36,21 +36,28 @@ class Visual_Regression_Admin {
 	 *
 	 * @since    1.0.0
 	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
+	 * @var      string $version The current version of this plugin.
 	 */
 	private $version;
 
 	/**
+	 * The BackstopJS config object gets stored here
+	 * @var     object
+	 */
+	private $generated_config;
+
+	/**
 	 * Initialize the class and set its properties.
 	 *
+	 * @param string $plugin_name The name of this plugin.
+	 * @param string $version The version of this plugin.
+	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
 
 		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		$this->version     = $version;
 
 	}
 
@@ -106,7 +113,10 @@ class Visual_Regression_Admin {
 	 * @since 1.0.0
 	 */
 	public function add_plugin_admin_menu() {
-		add_options_page( 'Visual Regression Options Settings', 'Visual Regression', 'manage_options', $this->plugin_name, array($this, 'display_plugin_setup_page'));
+		add_options_page( 'Visual Regression Options Settings', 'Visual Regression', 'manage_options', $this->plugin_name, array(
+			$this,
+			'display_plugin_setup_page'
+		) );
 	}
 
 	/**
@@ -116,8 +126,9 @@ class Visual_Regression_Admin {
 	 */
 	public function add_action_links( $links ) {
 		$settings_link = array(
-			'<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_name ) . '">' . __('Settings', $this->plugin_name) . '</a>',
+			'<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_name ) . '">' . __( 'Settings', $this->plugin_name ) . '</a>',
 		);
+
 		return array_merge( $settings_link, $links );
 	}
 
@@ -130,15 +141,59 @@ class Visual_Regression_Admin {
 
 		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
 
-		$config = new BackstopJSConfig(get_site_url() . '/sitemap.xml');
+		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml' );
 		$config->generateConfig();
 
-		$generatedConfig = $config->getConfig();
+		$this->generated_config = $config->getConfig();
 
 		echo "Testing URLs:\n";
 
-		foreach ($generatedConfig->scenarios as $scenario) {
+		foreach ( $this->generated_config->scenarios as $scenario ) {
 			echo "<div>$scenario->url</div>";
 		}
+
+		if ( isset( $_REQUEST['command'] ) ) {
+
+			$response = $this->handle_command();
+			echo "<div>doing reference</div>";
+//			echo "<div>$response</div>";
+			//var_dump( $response );
+		}
+	}
+
+	protected function do_test( $testId, $command ) {
+		$url = "http://localhost:3000/project/$testId/$command";
+
+		$config_to_post         = new stdClass();
+		$config_to_post->config = $this->generated_config;
+
+		return wp_remote_post( $url, array(
+				'headers'     => array( 'Content-Type' => 'application/json; charset=utf-8' ),
+				'body'        => json_encode( $config_to_post ),
+				'method'      => 'POST',
+				'data_format' => 'body'
+			)
+		);
+	}
+
+	/**
+	 * @return array|string|WP_Error
+	 */
+	private function handle_command() {
+		switch ( $_REQUEST['command'] ) {
+			case 'reference':
+				$response = $this->do_test( 'test_F', 'reference' );
+				break;
+
+			case 'test':
+				$response = $this->do_test( 'test_F', 'test' );
+				break;
+
+			default:
+				$response = "invalid command";
+				break;
+		}
+
+		return $response;
 	}
 }
