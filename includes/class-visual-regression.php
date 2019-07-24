@@ -122,6 +122,12 @@ class Visual_Regression {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-visual-regression-public.php';
 
+
+		/**
+		 * the class responsible for the Backstop test properties and behavior
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-backstop-test-case.php';
+
 		$this->loader = new Visual_Regression_Loader();
 
 	}

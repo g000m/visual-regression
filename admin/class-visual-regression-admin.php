@@ -148,52 +148,17 @@ class Visual_Regression_Admin {
 
 		echo "Testing URLs:\n";
 
-		foreach ( $this->generated_config->scenarios as $scenario ) {
-			echo "<div>$scenario->url</div>";
-		}
+		$backstop = new Backstop_Test_Case( $this->generated_config);
+
+		$backstop->list_scenarios();
 
 		if ( isset( $_REQUEST['command'] ) ) {
 
-			$response = $this->handle_command();
-			echo "<div>doing reference</div>";
+			echo "<div>doing command</div>";
+			$response = $backstop->handle_command( $_REQUEST['command'] );
 //			echo "<div>$response</div>";
-			//var_dump( $response );
+//			var_dump( $response );
 		}
 	}
 
-	protected function do_test( $testId, $command ) {
-		$url = "http://localhost:3000/project/$testId/$command";
-
-		$config_to_post         = new stdClass();
-		$config_to_post->config = $this->generated_config;
-
-		return wp_remote_post( $url, array(
-				'headers'     => array( 'Content-Type' => 'application/json; charset=utf-8' ),
-				'body'        => json_encode( $config_to_post ),
-				'method'      => 'POST',
-				'data_format' => 'body'
-			)
-		);
-	}
-
-	/**
-	 * @return array|string|WP_Error
-	 */
-	private function handle_command() {
-		switch ( $_REQUEST['command'] ) {
-			case 'reference':
-				$response = $this->do_test( 'test_F', 'reference' );
-				break;
-
-			case 'test':
-				$response = $this->do_test( 'test_F', 'test' );
-				break;
-
-			default:
-				$response = "invalid command";
-				break;
-		}
-
-		return $response;
-	}
 }
