@@ -170,6 +170,8 @@ class Visual_Regression {
 		$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' );
 		$this->loader->add_filter( 'plugin_action_links_' . $plugin_basename, $plugin_admin, 'add_action_links' );
 
+		// action for settings page buttons
+		$this->loader->add_action( 'wp_ajax_vr-ajax', $plugin_admin, 'vr_buttons_ajax_handler' );
 	}
 
 	/**

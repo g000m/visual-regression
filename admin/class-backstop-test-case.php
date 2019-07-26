@@ -3,11 +3,19 @@
 
 class Backstop_Test_Case {
 
+	/**
+	 * @var string
+	 */
 	private $config;
 
+	/**
+	 * @var unique ID of backstop test
+	 */
+	private $test_id;
 
-	public function __construct($config = '{}') {
+	public function __construct($config = '{}', $test_id = 'default_id') {
 		$this->config = $config;
+		$this->test_id = $test_id;
 	}
 
 	public function get_config() {

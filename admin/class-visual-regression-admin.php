@@ -46,6 +46,8 @@ class Visual_Regression_Admin {
 	 */
 	private $generated_config;
 
+	private $backstop;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -148,17 +150,84 @@ class Visual_Regression_Admin {
 
 		echo "Testing URLs:\n";
 
-		$backstop = new Backstop_Test_Case( $this->generated_config);
+		$this->backstop = new Backstop_Test_Case( $this->generated_config );
 
-		echo $backstop->list_scenarios();
+		echo $this->backstop->list_scenarios();
 
 		if ( isset( $_REQUEST['command'] ) ) {
 
 			echo "<div>doing command</div>";
-			$response = $backstop->handle_command( $_REQUEST['command'] );
+			$response = $this->backstop->handle_command( $_REQUEST['command'] );
 //			echo "<div>$response</div>";
 //			var_dump( $response );
 		}
+
+		?>
+
+        <div class="vr-settings__reference">
+            <button id="vr-settings__reference-button" class="vr-settings__reference-button button">Take reference
+                snapshots
+            </button>
+        </div>
+
+        <div class="vr-settings__test">
+            <button id="vr-settings__test-button" class="vr-settings__test-button button">Take test snapshots</button>
+        </div>
+
+        <script>
+			jQuery(function () {
+				jQuery("#vr-settings__reference-button").click(() => {
+					handleReferenceButton();
+				});
+
+				jQuery("#vr-settings__test-button").click(() => {
+					handleTestButton();
+				});
+
+			});
+
+			function handleReferenceButton() {
+				//ajax action
+				console.log('reference')
+                vr_button_ajax('reference');
+			}
+
+			function handleTestButton() {
+				//ajax action
+				console.log('test')
+			}
+
+			function vr_button_ajax(button_action, test_id = 'default') {
+				const url = '<?php echo get_admin_url() . 'admin-ajax.php'; ?>';
+				jQuery.post(
+					url,
+					{
+						'action': 'vr-ajax',
+						'av_button_action': button_action
+					},
+					function(response) {
+						console.log('The server responded: ', response);
+					}
+				);
+            }
+        </script>
+		<?php
 	}
 
+
+	function vr_buttons_ajax_handler() {
+
+		$button = sanitize_text_field( $_REQUEST['vr_button_action'] );
+
+		if ( in_array( $button, [ "reference", "test" ] ) ) {
+		    $this->backstop->do_test();
+	    }
+
+
+		// Make your response and echo it.
+		echo "ajax foobar";
+
+		// Don't forget to stop execution afterward.
+		wp_die();
+	}
 }
