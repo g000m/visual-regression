@@ -16,8 +16,8 @@ class Backstop_Test_Case {
 
 	public function list_scenarios() {
 		$output = '';
-		foreach ( $this->config['scenarios'] as $scenario ) {
-			$output .= "<div>". $scenario['url'] . "</div>";
+		foreach ( $this->config->scenarios as $scenario ) {
+			$output .= "<div>". $scenario->url . "</div>";
 		}
 
 		return $output;

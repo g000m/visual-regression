@@ -10,7 +10,7 @@ class Backstop_Test_CaseTest extends WP_UnitTestCase {
 
 		$string = file_get_contents( __DIR__ . "/backstopConfig.json" );
 
-		$this->default_config = json_decode( $string, true );
+		$this->default_config = json_decode( $string, false );
 
 		$this->class_instance = new Backstop_Test_Case( $this->default_config );
 	}
@@ -29,8 +29,8 @@ class Backstop_Test_CaseTest extends WP_UnitTestCase {
 		$config = $this->class_instance->get_config();
 		$output = '';
 
-		foreach ( $config['scenarios'] as $scenario ) {
-			$output .= "<div>" .$scenario['url']. "</div>";
+		foreach ( $config->scenarios as $scenario ) {
+			$output .= "<div>" . $scenario->url . "</div>";
 		}
 
 		$result = $this->class_instance->list_scenarios();
