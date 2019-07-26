@@ -150,7 +150,7 @@ class Visual_Regression_Admin {
 
 		$backstop = new Backstop_Test_Case( $this->generated_config);
 
-		$backstop->list_scenarios();
+		echo $backstop->list_scenarios();
 
 		if ( isset( $_REQUEST['command'] ) ) {
 

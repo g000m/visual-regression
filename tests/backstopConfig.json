@@ -1,0 +1,81 @@
+{
+    "viewports": [
+        {
+            "name": "phone",
+            "width": 320,
+            "height": 480
+        },
+        {
+            "name": "tablet_v",
+            "width": 568,
+            "height": 1024
+        },
+        {
+            "name": "tablet_h",
+            "width": 1024,
+            "height": 768
+        }
+    ],
+    "scenarios": [
+        {
+            "label": "Home page",
+            "url": "https://wp2.lan/",
+            "hideSelectors": [],
+            "removeSelectors": [],
+            "selectors": [],
+            "readyEvent": null,
+            "delay": 500,
+            "misMatchThreshold": 0.1,
+            "onReadyScript": null,
+            "onBeforeScript": null
+        },
+        {
+            "label": "Hello World",
+            "url": "https://wp2.lan/2019/05/28/hello-world/",
+            "hideSelectors": [],
+            "removeSelectors": [],
+            "selectors": [],
+            "readyEvent": null,
+            "delay": 500,
+            "misMatchThreshold": 0.1,
+            "onReadyScript": null,
+            "onBeforeScript": null
+        },
+        {
+            "label": "Get Pagey",
+            "url": "https://wp2.lan/get-pagey/",
+            "hideSelectors": [],
+            "removeSelectors": [],
+            "selectors": [],
+            "readyEvent": null,
+            "delay": 500,
+            "misMatchThreshold": 0.1,
+            "onReadyScript": null,
+            "onBeforeScript": null
+        },
+        {
+            "label": "Sample Page",
+            "url": "https://wp2.lan/sample-page/",
+            "hideSelectors": [],
+            "removeSelectors": [],
+            "selectors": [],
+            "readyEvent": null,
+            "delay": 500,
+            "misMatchThreshold": 0.1,
+            "onReadyScript": null,
+            "onBeforeScript": null
+        }
+    ],
+    "paths": [
+        "backstop_data/bitmaps_reference",
+        "backstop_data/bitmaps_test",
+        "backstop_data/bitmaps_test/compare.json",
+        "backstop_data/casper_scripts"
+    ],
+    "engine": "puppeteer",
+    "report": [
+        "browser",
+        "CLI"
+    ],
+    "debug": false
+}

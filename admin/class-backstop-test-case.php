@@ -5,14 +5,22 @@ class Backstop_Test_Case {
 
 	private $config;
 
-	public function __construct($config) {
+
+	public function __construct($config = '{}') {
 		$this->config = $config;
 	}
 
+	public function get_config() {
+		return $this->config;
+	}
+
 	public function list_scenarios() {
-		foreach ( $this->config->scenarios as $scenario ) {
-			echo "<div>$scenario->url</div>";
+		$output = '';
+		foreach ( $this->config['scenarios'] as $scenario ) {
+			$output .= "<div>". $scenario['url'] . "</div>";
 		}
+
+		return $output;
 	}
 
 	protected function do_test( $testId, $command ) {
