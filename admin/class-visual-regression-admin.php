@@ -27,7 +27,7 @@ class Visual_Regression_Admin {
 	 *
 	 * @since    1.0.0
 	 * @access   private
-	 * @var      string    $plugin_name    The ID of this plugin.
+	 * @var      string $plugin_name The ID of this plugin.
 	 */
 	private $plugin_name;
 
@@ -36,21 +36,30 @@ class Visual_Regression_Admin {
 	 *
 	 * @since    1.0.0
 	 * @access   private
-	 * @var      string    $version    The current version of this plugin.
+	 * @var      string $version The current version of this plugin.
 	 */
 	private $version;
 
 	/**
+	 * The BackstopJS config object gets stored here
+	 * @var     object
+	 */
+	private $generated_config;
+
+	private $backstop;
+
+	/**
 	 * Initialize the class and set its properties.
 	 *
+	 * @param string $plugin_name The name of this plugin.
+	 * @param string $version The version of this plugin.
+	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of this plugin.
-	 * @param      string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
 
 		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		$this->version     = $version;
 
 	}
 
@@ -100,4 +109,125 @@ class Visual_Regression_Admin {
 
 	}
 
+	/**
+	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
+	 *
+	 * @since 1.0.0
+	 */
+	public function add_plugin_admin_menu() {
+		add_options_page( 'Visual Regression Options Settings', 'Visual Regression', 'manage_options', $this->plugin_name, array(
+			$this,
+			'display_plugin_setup_page'
+		) );
+	}
+
+	/**
+	 * Add settings action link to the plugins page.
+	 *
+	 * @since 1.0.0
+	 */
+	public function add_action_links( $links ) {
+		$settings_link = array(
+			'<a href="' . admin_url( 'options-general.php?page=' . $this->plugin_name ) . '">' . __( 'Settings', $this->plugin_name ) . '</a>',
+		);
+
+		return array_merge( $settings_link, $links );
+	}
+
+	/**
+	 * Render the settings page for this plugin.
+	 *
+	 * @since 1.0.0
+	 */
+	public function display_plugin_setup_page() {
+
+		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
+
+		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml' );
+		$config->generateConfig();
+
+		$this->generated_config = $config->getConfig();
+
+		echo "Testing URLs:\n";
+
+		$this->backstop = new Backstop_Test_Case( $this->generated_config );
+
+		echo $this->backstop->list_scenarios();
+
+		if ( isset( $_REQUEST['command'] ) ) {
+
+			echo "<div>doing command</div>";
+			$response = $this->backstop->handle_command( $_REQUEST['command'] );
+//			echo "<div>$response</div>";
+//			var_dump( $response );
+		}
+
+		?>
+
+        <div class="vr-settings__reference">
+            <button id="vr-settings__reference-button" class="vr-settings__reference-button button">Take reference
+                snapshots
+            </button>
+        </div>
+
+        <div class="vr-settings__test">
+            <button id="vr-settings__test-button" class="vr-settings__test-button button">Take test snapshots</button>
+        </div>
+
+        <script>
+			jQuery(function () {
+				jQuery("#vr-settings__reference-button").click(() => {
+					handleReferenceButton();
+				});
+
+				jQuery("#vr-settings__test-button").click(() => {
+					handleTestButton();
+				});
+
+			});
+
+			function handleReferenceButton() {
+				//ajax action
+				console.log('reference')
+                vr_button_ajax('reference');
+			}
+
+			function handleTestButton() {
+				//ajax action
+				console.log('test')
+			}
+
+			function vr_button_ajax(button_action, test_id = 'default') {
+				const url = '<?php echo get_admin_url() . 'admin-ajax.php'; ?>';
+				jQuery.post(
+					url,
+					{
+						'action': 'vr-ajax',
+						'av_button_action': button_action
+					},
+					function(response) {
+						console.log('The server responded: ', response);
+					}
+				);
+            }
+        </script>
+		<?php
+	}
+
+
+	function vr_buttons_ajax_handler() {
+
+		$button = sanitize_text_field( $_REQUEST['vr_button_action'] );
+
+		if ( in_array( $button, [ "reference", "test" ] ) ) {
+		    $this->backstop->do_test();
+	    }
+
+
+		// Make your response and echo it.
+		echo "ajax foobar";
+
+		// Don't forget to stop execution afterward.
+		wp_die();
+	}
 }

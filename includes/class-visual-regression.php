@@ -122,6 +122,12 @@ class Visual_Regression {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-visual-regression-public.php';
 
+
+		/**
+		 * the class responsible for the Backstop test properties and behavior
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'admin/class-backstop-test-case.php';
+
 		$this->loader = new Visual_Regression_Loader();
 
 	}
@@ -157,6 +163,15 @@ class Visual_Regression {
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 
+		// Add settings menu item
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_plugin_admin_menu' );
+
+		// Add Settings link to the plugin
+		$plugin_basename = plugin_basename( plugin_dir_path( __DIR__ ) . $this->plugin_name . '.php' );
+		$this->loader->add_filter( 'plugin_action_links_' . $plugin_basename, $plugin_admin, 'add_action_links' );
+
+		// action for settings page buttons
+		$this->loader->add_action( 'wp_ajax_vr-ajax', $plugin_admin, 'vr_buttons_ajax_handler' );
 	}
 
 	/**
