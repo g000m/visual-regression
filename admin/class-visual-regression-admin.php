@@ -61,6 +61,11 @@ class Visual_Regression_Admin {
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
 
+		// create ACF options page. @TODO move this
+		if ( function_exists( 'acf_add_options_page' ) ) {
+			acf_add_options_page( 'option' );
+		}
+
 	}
 
 	/**
@@ -140,10 +145,15 @@ class Visual_Regression_Admin {
 	 * @since 1.0.0
 	 */
 	public function display_plugin_setup_page() {
+		$viewports = null;
 
 		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
 
-		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml' );
+		if ( function_exists( 'get_field' ) ) {
+			$viewports = $this->set_viewport_types( get_field( 'scenario', 'option' ) );
+		}
+
+		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml', $viewports );
 		$config->generateConfig();
 
 		$this->generated_config = $config->getConfig();
@@ -163,6 +173,19 @@ class Visual_Regression_Admin {
 		}
 
 		?>
+
+		<?php if ( $viewports ): ?>
+            <div class="vr-settings__scenarios">
+                <br>
+                <span>Viewports</span>
+				<?php
+				foreach ( $viewports as $viewport ) {
+					echo "<div>" . join( $viewport, ', ' ) . "</div>\n";
+				}
+				?>
+                <br>
+            </div>
+		<?php endif; ?>
 
         <div class="vr-settings__reference">
             <button id="vr-settings__reference-button" class="vr-settings__reference-button button">Take reference
@@ -189,7 +212,7 @@ class Visual_Regression_Admin {
 			function handleReferenceButton() {
 				//ajax action
 				console.log('reference')
-                vr_button_ajax('reference');
+				vr_button_ajax('reference');
 			}
 
 			function handleTestButton() {
@@ -205,11 +228,11 @@ class Visual_Regression_Admin {
 						'action': 'vr-ajax',
 						'av_button_action': button_action
 					},
-					function(response) {
+					function (response) {
 						console.log('The server responded: ', response);
 					}
 				);
-            }
+			}
         </script>
 		<?php
 	}
@@ -220,8 +243,8 @@ class Visual_Regression_Admin {
 		$button = sanitize_text_field( $_REQUEST['vr_button_action'] );
 
 		if ( in_array( $button, [ "reference", "test" ] ) ) {
-		    $this->backstop->do_test();
-	    }
+			$this->backstop->do_test();
+		}
 
 
 		// Make your response and echo it.
@@ -229,5 +252,20 @@ class Visual_Regression_Admin {
 
 		// Don't forget to stop execution afterward.
 		wp_die();
+	}
+
+	/**
+	 * @param $viewports
+	 *
+	 * @return array
+	 */
+	function set_viewport_types( $viewports ) {
+		return array_map( function ( $viewport ) {
+			return Array(
+				"name"   => $viewport['name'],
+				"width"  => (int) $viewport['width'],
+				"height" => (int) $viewport['height'],
+			);
+		}, $viewports );
 	}
 }

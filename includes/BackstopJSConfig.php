@@ -33,8 +33,9 @@ class BackstopJSConfig {
 	 *
 	 * @param $siteMapXMLURL
 	 *   URL of sitemap.xml
+	 * @param $viewports
 	 */
-	public function __construct( $siteMapXMLURL ) {
+	public function __construct( $siteMapXMLURL, $viewports = null ) {
 		// Set sitemap.xml URL.
 		$this->siteMapXMLURL = $siteMapXMLURL;
 
@@ -44,6 +45,13 @@ class BackstopJSConfig {
 		// Load viewports from config template.
 		if ( ! empty( $defaultConfig['viewports'] ) && is_array( $defaultConfig['viewports'] ) ) {
 			foreach ( $defaultConfig['viewports'] as $viewport ) {
+				$this->viewports[] = (object) $viewport;
+			}
+		}
+
+		if ( ! is_null($viewports) && is_array( $viewports) ) {
+			$this->viewports = []; // replace from defaultConfig
+			foreach ( $viewports as $viewport ) {
 				$this->viewports[] = (object) $viewport;
 			}
 		}
