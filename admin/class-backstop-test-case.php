@@ -31,8 +31,16 @@ class Backstop_Test_Case {
 		return $output;
 	}
 
+
+	/**
+	 * @param $testId
+	 * @param $command
+	 *
+	 * @return mixed
+	 */
 	protected function do_test( $testId, $command ) {
-		$url = "http://localhost:3000/project/$testId/$command";
+		$host = "http://localhost:3000";
+		$url  = "{$host}/project/$testId/$command";
 
 		$config_to_post         = new stdClass();
 		$config_to_post->config = $this->config;

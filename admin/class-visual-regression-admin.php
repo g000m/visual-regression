@@ -48,6 +48,8 @@ class Visual_Regression_Admin {
 
 	private $backstop;
 
+	private $viewports;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -145,18 +147,9 @@ class Visual_Regression_Admin {
 	 * @since 1.0.0
 	 */
 	public function display_plugin_setup_page() {
-		$viewports = null;
 
-		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
 
-		if ( function_exists( 'get_field' ) ) {
-			$viewports = $this->set_viewport_types( get_field( 'scenario', 'option' ) );
-		}
-
-		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml', $viewports );
-		$config->generateConfig();
-
-		$this->generated_config = $config->getConfig();
+		$this->setup();
 
 		echo "Testing URLs:\n";
 
@@ -174,12 +167,12 @@ class Visual_Regression_Admin {
 
 		?>
 
-		<?php if ( $viewports ): ?>
+		<?php if ( $this->viewports ): ?>
             <div class="vr-settings__scenarios">
                 <br>
                 <span>Viewports</span>
 				<?php
-				foreach ( $viewports as $viewport ) {
+				foreach ( $this->viewports as $viewport ) {
 					echo "<div>" . join( $viewport, ', ' ) . "</div>\n";
 				}
 				?>
@@ -226,7 +219,7 @@ class Visual_Regression_Admin {
 					url,
 					{
 						'action': 'vr-ajax',
-						'av_button_action': button_action
+						'vr_button_action': button_action
 					},
 					function (response) {
 						console.log('The server responded: ', response);
@@ -267,5 +260,22 @@ class Visual_Regression_Admin {
 				"height" => (int) $viewport['height'],
 			);
 		}, $viewports );
+	}
+
+
+	/**
+	 * get viewports and create config
+	 */
+	private function setup() {
+		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
+
+		if ( function_exists( 'get_field' ) ) {
+			$this->viewports = $this->set_viewport_types( get_field( 'scenario', 'option' ) );
+		}
+
+		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml', $this->viewports );
+		$config->generateConfig();
+
+		$this->generated_config = $config->getConfig();
 	}
 }
