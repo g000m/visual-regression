@@ -142,6 +142,22 @@ class Visual_Regression_Admin {
 	}
 
 	/**
+	 * get viewports and create config
+	 */
+	private function setup() {
+		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
+
+		if ( function_exists( 'get_field' ) ) {
+			$this->viewports = $this->set_viewport_types( get_field( 'scenario', 'option' ) );
+		}
+
+		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml', $this->viewports );
+		$config->generateConfig();
+
+		$this->generated_config = $config->getConfig();
+	}
+
+	/**
 	 * Render the settings page for this plugin.
 	 *
 	 * @since 1.0.0
@@ -260,22 +276,5 @@ class Visual_Regression_Admin {
 				"height" => (int) $viewport['height'],
 			);
 		}, $viewports );
-	}
-
-
-	/**
-	 * get viewports and create config
-	 */
-	private function setup() {
-		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
-
-		if ( function_exists( 'get_field' ) ) {
-			$this->viewports = $this->set_viewport_types( get_field( 'scenario', 'option' ) );
-		}
-
-		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml', $this->viewports );
-		$config->generateConfig();
-
-		$this->generated_config = $config->getConfig();
 	}
 }
