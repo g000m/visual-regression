@@ -35,6 +35,8 @@
         "casper_scripts": "backstop_data/casper_scripts"
     },
     "engine": "puppeteer",
+    "asyncCaptureLimit": 5,
+    "asyncCompareLimit": 5,
     "report": [
         "browser",
         "CLI"

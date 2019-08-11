@@ -142,9 +142,9 @@ class Visual_Regression_Admin {
 	}
 
 	/**
-	 * get viewports and create config
+	 * get viewports and generate config from saved viewport and default config template and sitemap.xml
 	 */
-	private function setup() {
+	private function generate_config() {
 		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
 
 		if ( function_exists( 'get_field' ) ) {
@@ -155,6 +155,9 @@ class Visual_Regression_Admin {
 		$config->generateConfig();
 
 		$this->generated_config = $config->getConfig();
+		$this->generated_config->asyncCaptureLimit = 5;
+		$this->generated_config->asyncCompareLimit = 5;
+
 	}
 
 	/**
@@ -164,8 +167,7 @@ class Visual_Regression_Admin {
 	 */
 	public function display_plugin_setup_page() {
 
-
-		$this->setup();
+		$this->generate_config();
 
 		echo "Testing URLs:\n";
 
@@ -220,13 +222,14 @@ class Visual_Regression_Admin {
 
 			function handleReferenceButton() {
 				//ajax action
-				console.log('reference')
+				console.log('reference');
 				vr_button_ajax('reference');
 			}
 
 			function handleTestButton() {
 				//ajax action
-				console.log('test')
+				console.log('test');
+				vr_button_ajax('test');
 			}
 
 			function vr_button_ajax(button_action, test_id = 'default') {
@@ -248,11 +251,15 @@ class Visual_Regression_Admin {
 
 
 	function vr_buttons_ajax_handler() {
+		$this->generate_config();
+
+		$this->backstop = new Backstop_Test_Case( $this->generated_config );
+
 
 		$button = sanitize_text_field( $_REQUEST['vr_button_action'] );
 
 		if ( in_array( $button, [ "reference", "test" ] ) ) {
-			$this->backstop->do_test();
+			$this->backstop->handle_command( $button );
 		}
 
 
