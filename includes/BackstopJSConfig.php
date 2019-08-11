@@ -111,6 +111,12 @@ class BackstopJSConfig {
 
 		$sitemap = $crawler->crawl( $this->siteMapXMLURL );
 
+		// response empty. need to detect response code somewhere in there.
+		if ( count( $sitemap ) === 0 ) {
+			return false;
+		}
+
+
 		foreach ( $sitemap as $item ) {
 			$page_url = (string) $item->getUrl();
 
@@ -136,6 +142,8 @@ class BackstopJSConfig {
 			$scenario->url     = $page_url;
 			$this->scenarios[] = $scenario;
 		}
+
+		return count( $sitemap );
 	}
 
 	/**
@@ -148,22 +156,25 @@ class BackstopJSConfig {
 			$destPath = $this->destDir;
 		}
 
-		$this->loadScenarios();
+		if ( $this->loadScenarios() ) {
 
-		$configOutput            = new stdClass();
-		$configOutput->viewports = $this->viewports;
-		$configOutput->scenarios = $this->scenarios;
-		$configOutput->paths     = $this->paths;
-		$configOutput->engine    = $this->engine;
-		$configOutput->report    = $this->report;
-		$configOutput->debug     = $this->debug;
+			$configOutput            = new stdClass();
+			$configOutput->viewports = $this->viewports;
+			$configOutput->scenarios = $this->scenarios;
+			$configOutput->paths     = $this->paths;
+			$configOutput->engine    = $this->engine;
+			$configOutput->report    = $this->report;
+			$configOutput->debug     = $this->debug;
 
-		$this->configOutput = $configOutput;
+			$this->configOutput = $configOutput;
 
-		// @TODO add some error handling
-		$fp = fopen( $destPath, 'w' );
-		fwrite( $fp, json_encode( $configOutput, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) );
-		fclose( $fp );
+			// @TODO add some error handling
+			$fp = fopen( $destPath, 'w' );
+			fwrite( $fp, json_encode( $configOutput, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT ) );
+			fclose( $fp );
+		} else {
+			throw new Exception();
+		}
 	}
 
 	/**

@@ -151,8 +151,15 @@ class Visual_Regression_Admin {
 			$this->viewports = $this->set_viewport_types( get_field( 'scenario', 'option' ) );
 		}
 
-		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml', $this->viewports );
-		$config->generateConfig();
+		$config = new BackstopJSConfig( get_home_url() . '/sitemap.xml' );
+
+		try {
+			$config->generateConfig();
+		} catch ( exception $e ) {
+			echo "failed to generate config";
+
+			return false;
+		}
 
 		$this->generated_config = $config->getConfig();
 		$this->generated_config->asyncCaptureLimit = 5;
