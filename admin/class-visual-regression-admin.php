@@ -48,6 +48,8 @@ class Visual_Regression_Admin {
 
 	private $backstop;
 
+	private $viewports;
+
 	/**
 	 * Initialize the class and set its properties.
 	 *
@@ -60,6 +62,11 @@ class Visual_Regression_Admin {
 
 		$this->plugin_name = $plugin_name;
 		$this->version     = $version;
+
+		// create ACF options page. @TODO move this
+		if ( function_exists( 'acf_add_options_page' ) ) {
+			acf_add_options_page( 'option' );
+		}
 
 	}
 
@@ -135,18 +142,32 @@ class Visual_Regression_Admin {
 	}
 
 	/**
+	 * get viewports and generate config from saved viewport and default config template and sitemap.xml
+	 */
+	private function generate_config() {
+		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
+
+		if ( function_exists( 'get_field' ) ) {
+			$this->viewports = $this->set_viewport_types( get_field( 'scenario', 'option' ) );
+		}
+
+		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml', $this->viewports );
+		$config->generateConfig();
+
+		$this->generated_config = $config->getConfig();
+		$this->generated_config->asyncCaptureLimit = 5;
+		$this->generated_config->asyncCompareLimit = 5;
+
+	}
+
+	/**
 	 * Render the settings page for this plugin.
 	 *
 	 * @since 1.0.0
 	 */
 	public function display_plugin_setup_page() {
 
-		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
-
-		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml' );
-		$config->generateConfig();
-
-		$this->generated_config = $config->getConfig();
+		$this->generate_config();
 
 		echo "Testing URLs:\n";
 
@@ -163,6 +184,19 @@ class Visual_Regression_Admin {
 		}
 
 		?>
+
+		<?php if ( $this->viewports ): ?>
+            <div class="vr-settings__scenarios">
+                <br>
+                <span>Viewports</span>
+				<?php
+				foreach ( $this->viewports as $viewport ) {
+					echo "<div>" . join( $viewport, ', ' ) . "</div>\n";
+				}
+				?>
+                <br>
+            </div>
+		<?php endif; ?>
 
         <div class="vr-settings__reference">
             <button id="vr-settings__reference-button" class="vr-settings__reference-button button">Take reference
@@ -188,13 +222,14 @@ class Visual_Regression_Admin {
 
 			function handleReferenceButton() {
 				//ajax action
-				console.log('reference')
-                vr_button_ajax('reference');
+				console.log('reference');
+				vr_button_ajax('reference');
 			}
 
 			function handleTestButton() {
 				//ajax action
-				console.log('test')
+				console.log('test');
+				vr_button_ajax('test');
 			}
 
 			function vr_button_ajax(button_action, test_id = 'default') {
@@ -203,25 +238,29 @@ class Visual_Regression_Admin {
 					url,
 					{
 						'action': 'vr-ajax',
-						'av_button_action': button_action
+						'vr_button_action': button_action
 					},
-					function(response) {
+					function (response) {
 						console.log('The server responded: ', response);
 					}
 				);
-            }
+			}
         </script>
 		<?php
 	}
 
 
 	function vr_buttons_ajax_handler() {
+		$this->generate_config();
+
+		$this->backstop = new Backstop_Test_Case( $this->generated_config );
+
 
 		$button = sanitize_text_field( $_REQUEST['vr_button_action'] );
 
 		if ( in_array( $button, [ "reference", "test" ] ) ) {
-		    $this->backstop->do_test();
-	    }
+			$this->backstop->handle_command( $button );
+		}
 
 
 		// Make your response and echo it.
@@ -229,5 +268,20 @@ class Visual_Regression_Admin {
 
 		// Don't forget to stop execution afterward.
 		wp_die();
+	}
+
+	/**
+	 * @param $viewports
+	 *
+	 * @return array
+	 */
+	function set_viewport_types( $viewports ) {
+		return array_map( function ( $viewport ) {
+			return Array(
+				"name"   => $viewport['name'],
+				"width"  => (int) $viewport['width'],
+				"height" => (int) $viewport['height'],
+			);
+		}, $viewports );
 	}
 }
