@@ -143,8 +143,15 @@ class Visual_Regression_Admin {
 
 		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
 
-		$config = new BackstopJSConfig( get_site_url() . '/sitemap.xml' );
-		$config->generateConfig();
+		$config = new BackstopJSConfig( get_home_url() . '/sitemap.xml' );
+
+		try {
+			$config->generateConfig();
+		} catch ( exception $e ) {
+			echo "failed to generate config";
+
+			return false;
+		}
 
 		$this->generated_config = $config->getConfig();
 
@@ -189,7 +196,7 @@ class Visual_Regression_Admin {
 			function handleReferenceButton() {
 				//ajax action
 				console.log('reference')
-                vr_button_ajax('reference');
+				vr_button_ajax('reference');
 			}
 
 			function handleTestButton() {
@@ -205,11 +212,11 @@ class Visual_Regression_Admin {
 						'action': 'vr-ajax',
 						'av_button_action': button_action
 					},
-					function(response) {
+					function (response) {
 						console.log('The server responded: ', response);
 					}
 				);
-            }
+			}
         </script>
 		<?php
 	}
@@ -220,8 +227,8 @@ class Visual_Regression_Admin {
 		$button = sanitize_text_field( $_REQUEST['vr_button_action'] );
 
 		if ( in_array( $button, [ "reference", "test" ] ) ) {
-		    $this->backstop->do_test();
-	    }
+			$this->backstop->do_test();
+		}
 
 
 		// Make your response and echo it.
