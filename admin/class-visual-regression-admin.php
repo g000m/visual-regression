@@ -156,7 +156,7 @@ class Visual_Regression_Admin {
 		try {
 			$config->generateConfig();
 		} catch ( exception $e ) {
-			echo "failed to generate config";
+			echo "<div>failed to generate config</div>";
 
 			return false;
 		}

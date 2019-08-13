@@ -13,8 +13,8 @@ class Backstop_Test_Case {
 	 */
 	private $test_id;
 
-	public function __construct($config = '{}', $test_id = 'default_id') {
-		$this->config = $config;
+	public function __construct( $config = '{}', $test_id = 'default_id' ) {
+		$this->config  = $config;
 		$this->test_id = $test_id;
 	}
 
@@ -22,15 +22,29 @@ class Backstop_Test_Case {
 		return $this->config;
 	}
 
+	/**
+	 * @return string
+	 */
 	public function list_scenarios() {
-		$output = '';
-		foreach ( $this->config->scenarios as $scenario ) {
-			$output .= "<div>". $scenario->url . "</div>";
-		}
+		if ( $this->count_scenarios() ) {
+			$output = (string) '';
 
-		return $output;
+			foreach ( $this->config->scenarios as $scenario ) {
+				$output .= "<div>" . $scenario->url . "</div>";
+			}
+
+			return $output;
+		}
 	}
 
+	/**
+	 * @return int
+	 */
+	public function count_scenarios() {
+		if (isset($this->config) && isset($this->config->scenarios) ) {
+			return count( $this->config->scenarios );
+		}
+	}
 
 	/**
 	 * @param $testId
