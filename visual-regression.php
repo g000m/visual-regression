@@ -75,8 +75,11 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-visual-regression.php';
  */
 function run_visual_regression() {
 
-	$plugin = new Visual_Regression();
-	$plugin->run();
+	// specifically avoiding loading on sitemap.xml
+	if ( is_admin() ) {
+		$plugin = new Visual_Regression();
+		$plugin->run();
+	}
 
 }
 run_visual_regression();
