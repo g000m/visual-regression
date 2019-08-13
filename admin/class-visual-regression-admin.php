@@ -148,7 +148,10 @@ class Visual_Regression_Admin {
 		require_once WP_PLUGIN_DIR . "/visual-regression/includes/BackstopJSConfig.php";
 
 		if ( function_exists( 'get_field' ) ) {
-			$this->viewports = $this->set_viewport_types( get_field( 'scenario', 'option' ) );
+			$scenario_array = get_field( 'scenario', 'option' );
+			if ( $scenario_array ) {
+				$this->viewports = $this->set_viewport_types( $scenario_array );
+			}
 		}
 
 		$config = new BackstopJSConfig( get_home_url() . '/sitemap.xml' );
@@ -161,7 +164,7 @@ class Visual_Regression_Admin {
 			return false;
 		}
 
-		$this->generated_config = $config->getConfig();
+		$this->generated_config                    = $config->getConfig();
 		$this->generated_config->asyncCaptureLimit = 5;
 		$this->generated_config->asyncCompareLimit = 5;
 
